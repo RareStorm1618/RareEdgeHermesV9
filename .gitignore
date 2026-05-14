@@ -1,6 +1,8 @@
 # Secrets and machine-local auth
 .env
 .env.*
+!.env.example
+!config/.env.example
 auth.json
 auth.lock
 *.token
