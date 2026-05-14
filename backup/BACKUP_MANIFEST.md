@@ -1,8 +1,8 @@
 # Backup Manifest
 
-Generated: 2026-05-14T20:37:16.640092+00:00
+Generated: 2026-05-14T20:38:05.765094+00:00
 
-Source root: `/mnt/c/Users/MP3-Backup/AppData/Local/hermes`
+Source root: `C:\Users\MP3-Backup\AppData\Local\hermes`
 
 Included top-level items:
 - `skills`
