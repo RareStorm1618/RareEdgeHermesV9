@@ -1,0 +1,47 @@
+{
+  "jobs": [
+    {
+      "id": "d3b5143e8836",
+      "name": "Nightly Hermes GitHub backup",
+      "prompt": "Run the Hermes backup script to back up selected Hermes Agent skills, memories, hooks, cron metadata, Hermes-agent working files, and selected non-secret state to https://github.com/RareStorm1618/RareEdgeHermesV9.git. The script must exclude secrets/tokens/auth files/caches/logs/sessions/sandboxes and should report the pushed commit or a failure.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": "backup_hermes_to_github.py",
+      "no_agent": true,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 0 * * *",
+        "display": "0 0 * * *"
+      },
+      "schedule_display": "0 0 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-05-14T13:38:19.455021-07:00",
+      "next_run_at": "2026-05-15T00:00:00-07:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "last_delivery_error": null,
+      "deliver": "origin",
+      "origin": {
+        "platform": "discord",
+        "chat_id": "1488999615054483749",
+        "chat_name": "RareEdge / #rareedge\ud83d\udc8e",
+        "thread_id": null
+      },
+      "enabled_toolsets": null,
+      "workdir": null
+    }
+  ],
+  "updated_at": "2026-05-14T13:39:10.652895-07:00"
+}
