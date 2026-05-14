@@ -1,0 +1,36 @@
+# Secrets and machine-local auth
+.env
+.env.*
+auth.json
+auth.lock
+*.token
+*.secret
+
+# Runtime state
+logs/
+sessions/
+cache/
+audio_cache/
+image_cache/
+pastes/
+sandboxes/
+gateway.pid
+gateway.lock
+gateway_state.json
+channel_directory.json
+discord_threads.json
+*.db
+*.db-shm
+*.db-wal
+*.lock
+
+# Full Hermes source/install tree belongs upstream, not in this setup repo
+hermes-agent/
+venv/
+.venv/
+
+# OS/editor noise
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/
