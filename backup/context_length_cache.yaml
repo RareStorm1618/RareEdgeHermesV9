@@ -1,0 +1,5 @@
+context_lengths:
+  gemma4:e2b@http://127.0.0.1:11434/v1: 131072
+  gemma4:e4b@http://127.0.0.1:11434/v1: 131072
+  gpt-5.5@https://chatgpt.com/backend-api/codex: 272000
+  gpt-5.5@https://chatgpt.com/backend-api/codex/: 272000
