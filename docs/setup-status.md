@@ -11,6 +11,9 @@ Last checked: 2026-05-14
 - Discord gateway starts and connects successfully.
 - Gateway is installed as a Windows login startup command.
 - Skills Hub directory is initialized.
+- `GITHUB_TOKEN` is configured in the local Hermes `.env` and verified for GitHub repo API access.
+- GitHub CLI is installed and authenticated on Windows and WSL Ubuntu.
+- GitHub SSH authentication works on Windows and WSL Ubuntu.
 - Required Python packages are installed, including OpenAI SDK, Rich, dotenv, PyYAML, HTTPX, Croniter, `discord.py`, and `aiohttp`.
 
 ## Fixes Applied
@@ -23,16 +26,20 @@ Last checked: 2026-05-14
 - Installed missing Discord gateway dependency `aiohttp==3.13.3`.
 - Installed Discord voice extras dependencies `PyNaCl` and `davey`; Opus codec is still optional and not installed.
 - Restarted the gateway and verified Discord connection in logs.
+- Verified `GITHUB_TOKEN` from Hermes `.env` against the GitHub API as `RareStorm1618`.
+- Installed `gh` in WSL Ubuntu and authenticated it for HTTPS GitHub operations.
+- Copied the existing GitHub SSH key into WSL Ubuntu and configured `~/.ssh/config`.
 
 ## Current Expected Warnings
 
 These are not blockers for Discord text operation:
 
 - Optional providers are not logged in: Nous Portal, Gemini OAuth, MiniMax OAuth.
-- `GITHUB_TOKEN` is not configured, so unauthenticated GitHub API rate limits are lower.
 - Optional submodule `tinker-atropos` is missing.
 - Optional toolsets that require extra API keys or system dependencies remain unavailable.
 - Opus codec is missing, so Discord voice playback is disabled.
+
+The local GitHub token is intentionally not committed to this repository.
 
 ## Gateway Paths
 
