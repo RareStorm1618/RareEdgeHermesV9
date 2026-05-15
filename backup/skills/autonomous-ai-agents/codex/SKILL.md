@@ -32,6 +32,24 @@ Requires the codex CLI and a git repository.
 - **Must run inside a git repository** — Codex refuses to run outside one
 - Use `pty=true` in terminal calls — Codex is an interactive terminal app
 
+### Windows + WSL PATH and path sanity check
+
+On Windows-hosted Hermes sessions that shell into WSL, verify both the shell-resolved command and any known shim before launching long Codex jobs:
+
+```bash
+command -v codex
+type -a codex 2>/dev/null || true
+codex --version
+# If PATH is stale and resolves to a Windows npm shim from WSL, try the Linux shim directly:
+/home/mp3/.local/bin/codex --version
+```
+
+If the current bot/process has a stale PATH, use the absolute Linux shim (`/home/mp3/.local/bin/codex`) for WSL commands until the bot is restarted. If running from Windows, use `codex`/`codex.cmd` normally. Capture this as a setup workaround, not as a tool failure.
+
+When Hermes itself is hosted on Windows but the terminal backend is bash/WSL, avoid Windows-style paths in shell commands and tool `workdir` values. Use WSL paths (`/mnt/c/Users/...`) for Codex `--cd`, redirected prompt/result files, and any verification commands. If the terminal tool tries to start from an invalid Windows cwd (for example `C:\Users\...`) and fails before running your script, set `workdir="/"` and `cd /mnt/c/...` inside the command. Prefer `/mnt/c/...` over `/c/...` when interacting with WSL processes that were launched with `/mnt/c/...` paths.
+
+For long-running background Codex jobs after an interruption/context compression, don't rely on one tracker signal alone. `process(action="poll")` may still show a session as running while `process(action="list")` is empty. Verify with `ps -ef | grep codex`, check the expected `--output-last-message` file, and inspect the target repo status before deciding whether to kill or restart the job.
+
 For Hermes itself, `model.provider: openai-codex` uses Hermes-managed Codex
 OAuth from `~/.hermes/auth.json` after `hermes auth add openai-codex`. For the
 standalone Codex CLI, a valid CLI OAuth session may live under
@@ -39,6 +57,8 @@ standalone Codex CLI, a valid CLI OAuth session may live under
 that Codex auth is missing.
 
 ## One-Shot Tasks
+
+For this user's RareEdge work-order workflow, see `references/rareedge-workorder-codex.md` for the current streamlined Discord/Hermes GOAL MODE wave prompt. Use that reference as the canonical prompt template for wave runs: it includes rr-wxrkorder + qq-verfification skill links, explicit commit/push YES/NO, scoped-file rules, validation evidence, final status categories, and stop conditions. When the repo already has unrelated pre-existing dirty files, prefer `Commit/push: NO` for the Codex implementation pass, then have parent Hermes verify/stage/commit/push only scoped changes separately.
 
 ```
 terminal(command="codex exec 'Add dark mode toggle to settings'", workdir="~/project", pty=true)

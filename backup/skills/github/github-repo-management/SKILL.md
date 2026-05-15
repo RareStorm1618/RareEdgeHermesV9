@@ -198,6 +198,15 @@ gh repo sync $GH_USER/repo-name
 
 ## 4. Repository Information
 
+### Safe repo write verification
+
+When the user asks whether Hermes can read/write a repository, verify without changing application files:
+
+1. `GET /repos/<owner>/<repo>` and report visibility, default branch, language, and `permissions`.
+2. `GET /repos/<owner>/<repo>/contents?ref=<default_branch>` to prove content read.
+3. If write verification is requested, `GET /repos/<owner>/<repo>/git/ref/heads/<default_branch>`, `POST /repos/<owner>/<repo>/git/refs` with a temporary branch like `hermes-token-write-test-<timestamp>`, then immediately `DELETE /repos/<owner>/<repo>/git/refs/heads/<temp_branch>`.
+4. Report create/delete HTTP statuses and confirm deletion. Do not create commits or touch project files for a permissions test.
+
 **With gh:**
 
 ```bash

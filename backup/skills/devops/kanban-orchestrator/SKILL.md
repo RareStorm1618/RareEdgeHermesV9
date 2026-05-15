@@ -150,6 +150,8 @@ Tell them what you created in plain prose, naming the actual profiles you used:
 
 ## Common patterns
 
+**External-agent visibility lane:** When work is run by an outside process (Codex CLI, Claude Code, OpenCode, a CI job, or another long-running terminal process) but the user wants board visibility, create an implementation card for the external agent and a child verifier card for evidence review. Record the process/session id, prompt file, repo path, validation commands, and remaining gates on the cards. See `references/external-agent-visibility.md`.
+
 **Fan-out + fan-in (research → synthesize):** N research-style cards with no parents, one synthesis card with all of them as parents.
 
 **Parallel implementation + validation:** one implementer card makes the change while one explorer/researcher card verifies config, docs, or source mapping. A reviewer card can depend on both. Do not make the implementer own unrelated verification just because the user mentioned both in one sentence.

@@ -92,6 +92,18 @@ git commit -m "feat: add JWT-based user authentication
 - Add unit tests for auth flow"
 ```
 
+### Dirty-tree and scoped-file discipline
+
+Before staging, check the worktree and separate current-task files from pre-existing or unrelated residue:
+
+```bash
+git status --short
+```
+
+If the user gave an explicit scope, or if the session is a work-order/wave with named files, stage only the files that belong to that scope. Do **not** use `git add .` when unrelated dirty files are present. Preserve pre-existing dirty files unless the user explicitly says to clean, revert, or include them. In the handoff, call out any intentionally preserved dirty files so the user knows they were not accidentally omitted.
+
+For direct-to-`main` commits that are explicitly requested, use the same discipline: verify local checks, stage only scoped files, commit, push, then compare `HEAD` and `origin/main` before reporting success.
+
 Commit message format (Conventional Commits):
 ```
 type(scope): short description
@@ -108,6 +120,21 @@ Types: `feat`, `fix`, `refactor`, `docs`, `test`, `ci`, `chore`, `perf`
 ```bash
 git push -u origin HEAD
 ```
+
+### Verify the Remote SHA After Pushing
+
+For automation handoffs, do not stop at a successful `git push`. Fetch the target ref and compare the local commit to the remote branch so the completion report can state exactly what was verified:
+
+```bash
+BRANCH=$(git branch --show-current)
+git fetch origin "$BRANCH"
+LOCAL_SHA=$(git rev-parse HEAD)
+REMOTE_SHA=$(git rev-parse "origin/$BRANCH")
+printf 'HEAD=%s\norigin/%s=%s\n' "$LOCAL_SHA" "$BRANCH" "$REMOTE_SHA"
+test "$LOCAL_SHA" = "$REMOTE_SHA"
+```
+
+If committing directly to `main` by explicit instruction, use the same pattern with `BRANCH=main`. Include both SHAs in the handoff when the user asked whether GitHub setup/push status is complete.
 
 ### Create the PR
 

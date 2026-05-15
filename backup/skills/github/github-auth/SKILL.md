@@ -108,6 +108,19 @@ git config --global user.name
 git config --global user.email
 ```
 
+### Safe API Read/Write Verification for Automation Tokens
+
+When the user drops a GitHub token into Hermes `.env` and asks whether it can read/write, do not print the token. Load `GITHUB_TOKEN`/`GH_TOKEN`/`GITHUB_PAT`, then:
+
+1. `GET /user` — confirms auth and account identity.
+2. `GET /user/repos` — confirms repository read visibility.
+3. For repository write, prefer a low-impact temporary-branch test on a writable repo:
+   - get the default branch ref,
+   - `POST /repos/{owner}/{repo}/git/refs` with `refs/heads/hermes-token-write-test-<timestamp>`,
+   - immediately `DELETE /repos/{owner}/{repo}/git/refs/heads/<branch>`.
+
+This validates repo write without modifying files or opening PRs. Do not rely on gist creation as the only write test; fine-grained PATs can allow repository writes while returning `403 Resource not accessible by personal access token` for gists.
+
 ### Option B: SSH Key Authentication
 
 Good for users who prefer SSH or already have keys set up.
@@ -189,6 +202,34 @@ gh auth status
 ## Using the GitHub API Without gh
 
 When `gh` is not available, you can still access the full GitHub API using `curl` with a personal access token. This is how the other GitHub skills implement their fallbacks.
+
+### Hermes/Windows `.env` token discovery
+
+On this user's Windows + WSL setup, Hermes may store credentials under the Windows profile rather than the Linux home directory. When checking for GitHub API auth, include both native and mounted Windows locations before declaring auth missing:
+
+```bash
+# Linux/WSL candidate locations
+~/.hermes/.env
+~/AppData/Local/hermes/.env
+/mnt/c/Users/MP3-Backup/AppData/Local/hermes/.env
+```
+
+Accept these variable names, in priority order: `GITHUB_TOKEN`, `GH_TOKEN`, `GITHUB_PAT`, `GITHUB_API_KEY`. Never print the token value; report only source/key and maybe length.
+
+### Push/remote operations when cached HTTPS credentials are stale
+
+If `git push`, `git fetch`, or `git ls-remote` fails with GitHub's password-auth/stale-credential error, do **not** declare GitHub setup broken if a Hermes `.env` token is present. Retry the exact operation with a per-command HTTPS `extraheader` built from the token, so the token is not written into the remote URL or printed. See `references/hermes-token-push.md` for a reusable temporary-script pattern and verification checklist.
+
+```bash
+TOKEN="$(grep -E '^(GITHUB_TOKEN|GH_TOKEN|GITHUB_PAT|GITHUB_API_KEY)=' /mnt/c/Users/MP3-Backup/AppData/Local/hermes/.env | head -1 | cut -d= -f2- | tr -d '\r')"
+AUTH="$(printf 'x-access-token:%s' "$TOKEN" | base64 | tr -d '\n')"
+git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH" push origin main
+git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $AUTH" ls-remote origin refs/heads/main
+```
+
+Prefer putting the token-loading logic in a temporary script if shell quoting gets complex. Verify a push by comparing `git rev-parse HEAD` with the token-authenticated `ls-remote` SHA.
+
+For write verification, prefer a low-impact repo write test over a gist test: list repos, choose a writable non-archived repo, create a temporary branch from the default branch ref, then delete it immediately. Gist writes can fail on fine-grained tokens even when repo read/write is correctly configured.
 
 ### Setting the Token for API Calls
 

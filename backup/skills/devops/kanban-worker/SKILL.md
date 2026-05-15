@@ -172,6 +172,10 @@ If you open the task and `kanban_show` returns `runs: [...]` with one or more cl
 
 **Don't rely on the CLI when the guidance is available.** The `kanban_*` tools work across all terminal backends (Docker, Modal, SSH). `hermes kanban <verb>` from your terminal tool will fail in containerized backends because the CLI isn't installed there. When in doubt, use the tool.
 
+## Dispatcher/startup fallback
+
+If a dispatcher-spawned worker crashes before doing useful work because the local profile/console environment failed to start, the parent/operator may execute the card directly as a controlled fallback. Preserve the Kanban audit trail: comment that the worker crashed before work, perform the scoped task with the appropriate specialist tool, record exact checks/commit/push evidence, then complete or block the implementation and verifier cards based on verifiable results. See `references/windows-dispatcher-fallback.md` for a concise recovery checklist.
+
 ## CLI fallback (for scripting)
 
 Every tool has a CLI equivalent for human operators and scripts:

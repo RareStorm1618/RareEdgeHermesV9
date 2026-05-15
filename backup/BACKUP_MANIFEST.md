@@ -1,6 +1,6 @@
 # Backup Manifest
 
-Generated: 2026-05-14T20:39:15.940057+00:00
+Generated: 2026-05-15T07:00:34.715275+00:00
 
 Source root: `C:\Users\MP3-Backup\AppData\Local\hermes`
 
@@ -11,7 +11,6 @@ Included top-level items:
 - `cron`
 - `hermes-agent`
 - `SOUL.md`
-- `.skills_prompt_snapshot.json`
 - `channel_directory.json`
 - `discord_threads.json`
 - `gateway_state.json`
