@@ -1,3 +1,3 @@
-Rod wants Hermes to start each new RareEdge wave in a fresh session when possible, or recommend/run `/compress` at the end of each wave, to keep Discord context light and token usage efficient.
+Rod wants each new RareEdge wave triggered by “run wave XX” to start in a fresh Hermes session via `/new` when possible, instead of relying on `/compress`, to keep Discord context light, speed execution, and reduce token usage.
 §
 Rod prefers RareEdge wave work to use the streamlined Discord/Hermes GOAL MODE prompt template that explicitly lists rr-wxrkorder and qq-verfification skills, wave/agent line, commit/push YES or NO, scoped files, validation evidence, final status categories, and stop conditions.

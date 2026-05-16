@@ -28,10 +28,14 @@ if command -v gh &>/dev/null && gh auth status &>/dev/null; then
   AUTH="gh"
 else
   AUTH="git"
-  # Ensure we have a token for API calls
+  # Ensure we have a token for API calls. On Windows-hosted Hermes sessions,
+  # the durable Hermes env commonly lives under AppData/Local/hermes and is
+  # mounted in WSL as /mnt/c/Users/<user>/AppData/Local/hermes/.env.
   if [ -z "$GITHUB_TOKEN" ]; then
     if [ -f ~/.hermes/.env ] && grep -q "^GITHUB_TOKEN=" ~/.hermes/.env; then
-      GITHUB_TOKEN=$(grep "^GITHUB_TOKEN=" ~/.hermes/.env | head -1 | cut -d= -f2 | tr -d '\n\r')
+      GITHUB_TOKEN=$(grep "^GITHUB_TOKEN=" ~/.hermes/.env | head -1 | cut -d= -f2- | tr -d '\n\r')
+    elif [ -f /mnt/c/Users/MP3-Backup/AppData/Local/hermes/.env ] && grep -q "^GITHUB_TOKEN=" /mnt/c/Users/MP3-Backup/AppData/Local/hermes/.env; then
+      GITHUB_TOKEN=$(grep "^GITHUB_TOKEN=" /mnt/c/Users/MP3-Backup/AppData/Local/hermes/.env | head -1 | cut -d= -f2- | tr -d '\n\r')
     elif grep -q "github.com" ~/.git-credentials 2>/dev/null; then
       GITHUB_TOKEN=$(grep "github.com" ~/.git-credentials 2>/dev/null | head -1 | sed 's|https://[^:]*:\([^@]*\)@.*|\1|')
     fi
@@ -39,6 +43,26 @@ else
 fi
 echo "Using: $AUTH"
 ```
+
+If WSL `gh auth status` is invalid but Hermes has a working `GITHUB_TOKEN`, do not stop at the stale `gh` failure. Use the token for Git/API operations and avoid printing it. For Git pushes, prefer a temporary per-command auth header instead of rewriting remotes or credential files:
+
+```bash
+python3 - <<'PY'
+import os, subprocess, base64, pathlib, sys
+text = pathlib.Path('/mnt/c/Users/MP3-Backup/AppData/Local/hermes/.env').read_text()
+token = next((line.split('=', 1)[1].strip().strip('"').strip("'")
+              for line in text.splitlines() if line.startswith('GITHUB_TOKEN=')), None)
+if not token:
+    raise SystemExit('GITHUB_TOKEN missing')
+env = os.environ.copy()
+env['GIT_CONFIG_COUNT'] = '1'
+env['GIT_CONFIG_KEY_0'] = 'http.https://github.com/.extraheader'
+env['GIT_CONFIG_VALUE_0'] = 'AUTHORIZATION: Basic ' + base64.b64encode(('x-access-token:' + token).encode()).decode()
+subprocess.run(['git', 'push', '-u', 'origin', 'HEAD'], cwd='/path/to/repo-or-worktree', env=env, check=True)
+PY
+```
+
+For multiple worktrees, run that pattern per worktree and then fetch/compare `HEAD` with `origin/<branch>` before reporting success.
 
 ### Extracting Owner/Repo from the Git Remote
 
@@ -103,6 +127,8 @@ git status --short
 If the user gave an explicit scope, or if the session is a work-order/wave with named files, stage only the files that belong to that scope. Do **not** use `git add .` when unrelated dirty files are present. Preserve pre-existing dirty files unless the user explicitly says to clean, revert, or include them. In the handoff, call out any intentionally preserved dirty files so the user knows they were not accidentally omitted.
 
 For direct-to-`main` commits that are explicitly requested, use the same discipline: verify local checks, stage only scoped files, commit, push, then compare `HEAD` and `origin/main` before reporting success.
+
+When the requested direct-to-`main` push spans multiple isolated worktrees and the primary worktree is dirty with unrelated files, do not try to stage from the primary worktree. Commit each scoped worktree, create a fresh integration worktree from `origin/main`, cherry-pick the scoped commits there, resolve conflicts in the integration worktree, run checks, then push `HEAD:main` and verify the remote SHA. This preserves unrelated local churn while still satisfying an explicit direct-main request.
 
 Commit message format (Conventional Commits):
 ```

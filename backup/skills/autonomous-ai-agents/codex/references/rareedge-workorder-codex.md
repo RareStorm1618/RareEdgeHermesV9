@@ -2,6 +2,26 @@
 
 Use this streamlined Discord/Hermes skill prompt for each RareEdgeV9 wave.
 
+## Trigger protocol for "run wave XX"
+
+When Rod says `run wave XX`, optimize for a fresh, low-context execution:
+
+1. **Fresh-session gate first.** If the current Discord/Hermes conversation already contains substantial prior work, immediately ask Rod to run `/new` and then re-send exactly `run wave XX`. Do not use `/compress` as the default for RareEdge waves. A true `/new` session is preferred for speed, low token usage, and cleaner recovery.
+2. **If this is already a fresh session**, proceed immediately without asking clarifying questions unless the wave number or repo is ambiguous.
+3. **Use the minimal wave bootstrap**, not broad chat history:
+   - Load this `codex` skill and this reference.
+   - Read `RRbuild.md`.
+   - Locate the wave source prompt/work-order grouping from repo files or recent session search only if it is not obvious from RRbuild/work-order docs.
+   - Create an active todo with discovery, launch, monitor, dependent follow-ups, verify/integrate.
+4. **Parallelize only independent agent lines.** Launch independent Codex worktrees concurrently with `--output-last-message`; run dependent follow-ups sequentially in the same worktree when they build on earlier changes.
+5. **Prefer result files over live logs.** For speed, wait on Codex jobs with `notify_on_complete`, then read each handoff file and inspect the worktree status/diff directly. Avoid repeatedly streaming huge Codex logs unless a job appears stuck.
+6. **Default commit mode.** Unless Rod explicitly says `commit and push`, run implementation agents with `Commit/push: NO`; parent Hermes handles scoped integration separately after verification.
+7. **Integration speed path.** When Rod later says to commit/push everything to `main`, follow `references/rareedge-wave-direct-main-integration.md`: commit scoped worktrees, cherry-pick into a fresh `origin/main` integration worktree, verify, push `HEAD:main`, and compare full SHAs.
+8. **Context-resumption discipline.** Record process ids, worktree paths, prompt files, and result files immediately after launch so a context compaction/tool-limit interruption can resume without rediscovery. If a max tool-call/tool-iteration limit forces a final response, distinguish Codex-reported evidence from parent-Hermes-verified evidence, include the last known process/worktree/result-file state, and do not upgrade status beyond what was actually verified before the limit.
+9. **Wave-plan ambiguity stop.** If Rod gives only `run wave XX` and no wave/source prompt/agent lines can be found in `RRbuild.md`, repo files, or recent session search, do not infer the next WO sequence from adjacent waves. Ask for the Wave XX agent line block and pause before launching Codex.
+
+Important limitation: Hermes agents cannot reliably invoke Discord's `/new` slash command on Rod's behalf from inside an assistant response. If a fresh session is needed, tell Rod to run `/new` himself and re-send `run wave XX`; after that, execute the wave directly. If `/new` is unavailable or Rod says it is not working, do not deadlock the wave workflow on `/new`; proceed in the current session with the minimal bootstrap above once the wave plan is unambiguous.
+
 ```text
 You are the RareEdgeV9 wave work-order agent.
 
@@ -71,6 +91,12 @@ Constraints:
 - Do not perform destructive DB changes, staging/prod mutations, or live-provider actions without explicit approval.
 - Do not invent external evidence or claim external systems were verified unless actually tested.
 - Keep the implementation auditable, scoped, and consistent with existing repo patterns.
+
+Orchestration note:
+When Hermes is coordinating multiple Codex work-order agents for a wave, also follow `references/rareedge-wave-orchestration.md`: record process ids/result files, launch dependent WO groups sequentially, verify every handoff file before integration, and preserve resumption state if context/tool limits interrupt the run.
+
+Direct-to-main integration note:
+When the user explicitly asks to commit/push a multi-agent RareEdge wave to `main`, and especially when the primary worktree has unrelated dirty state, follow `references/rareedge-wave-direct-main-integration.md`: commit scoped agent worktrees first, integrate via a fresh `origin/main` worktree, cherry-pick scoped commits, resolve conflicts there, run checks, push `HEAD:main`, and verify `HEAD == origin/main` by full SHA.
 
 Validation requirements:
 Run feasible targeted checks, including where applicable:

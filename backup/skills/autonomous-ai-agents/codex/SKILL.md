@@ -60,6 +60,10 @@ that Codex auth is missing.
 
 For this user's RareEdge work-order workflow, see `references/rareedge-workorder-codex.md` for the current streamlined Discord/Hermes GOAL MODE wave prompt. Use that reference as the canonical prompt template for wave runs: it includes rr-wxrkorder + qq-verfification skill links, explicit commit/push YES/NO, scoped-file rules, validation evidence, final status categories, and stop conditions. When the repo already has unrelated pre-existing dirty files, prefer `Commit/push: NO` for the Codex implementation pass, then have parent Hermes verify/stage/commit/push only scoped changes separately.
 
+If standalone Codex is unavailable or parallel wave slices are delegated through Hermes subagents instead, follow `references/rareedge-wave-hermes-fallback.md`: use one isolated worktree per agent line, treat subagent summaries as untrusted until parent verification, and audit each worktree's diffs/checks before reporting final status.
+
+When the user explicitly asks to push a completed RareEdge wave to `main`, follow `references/rareedge-wave-direct-main-integration.md`: commit only scoped workstream changes, cherry-pick them into a fresh `origin/main` integration worktree, verify conflict cleanup/status/checks there, push with the Hermes GitHub token header, and compare local/remote/ls-remote SHAs before reporting success.
+
 ```
 terminal(command="codex exec 'Add dark mode toggle to settings'", workdir="~/project", pty=true)
 ```
