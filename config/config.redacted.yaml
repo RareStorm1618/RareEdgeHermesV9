@@ -65,7 +65,8 @@ agent:
 terminal:
   backend: local
   modal_mode: auto
-  cwd: .
+  # Native Windows: use a real repo root (not `.` mixed with WSL `/mnt/c` tools).
+  cwd: C:/Users/<YOU>/Documents/GitHub
   timeout: 180
   env_passthrough: []
   shell_init_files: []
@@ -413,7 +414,8 @@ personalities: {}
 security:
   allow_private_urls: false
   redact_secrets: true
-  tirith_enabled: true
+  # Tirith has no Windows binary; leave off on Windows to avoid WinError 2 spam.
+  tirith_enabled: false
   tirith_path: tirith
   tirith_timeout: 5
   tirith_fail_open: true
